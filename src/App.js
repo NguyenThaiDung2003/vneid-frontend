@@ -1,25 +1,98 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { useState, useEffect } from "react";
+import { Routes, Route, Link } from "react-router-dom";
+import AuthService from "./services/auth.service";
 
-function App() {
+import Login from "./components/Login";
+import Register from "./components/Register";
+import Home from "./components/Home";
+import Profile from "./components/Profile";
+import BoardUser from "./components/BoardUser";
+import BoardAdmin from "./components/BoardAdmin";
+
+const App = () => {
+  const [showAdminBoard, setShowAdminBoard] = useState(false);
+  const [currentUser, setCurrentUser] = useState(undefined);
+
+  useEffect(() => {
+    const user = AuthService.getCurrentUser();
+
+    if (user) {
+      setCurrentUser(user);
+      setShowAdminBoard(user.role === 'admin');
+    }
+  }, []);
+
+  const logOut = () => {
+    AuthService.logout();
+    setShowAdminBoard(false);
+    setCurrentUser(undefined);
+  };
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div>
+      <nav className="bg-white shadow-md">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
+            <div className="flex items-center">
+              <Link to={"/"} className="text-xl font-bold text-gray-800">
+                VNeID Clone
+              </Link>
+              <div className="hidden md:block">
+                <div className="ml-10 flex items-baseline space-x-4">
+                  <Link to={"/home"} className="text-gray-600 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium">
+                    Trang chủ
+                  </Link>
+                  {showAdminBoard && (
+                    <Link to={"/admin"} className="text-gray-600 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium">
+                      Admin Board
+                    </Link>
+                  )}
+                  {currentUser && (
+                    <Link to={"/user"} className="text-gray-600 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium">
+                      User Board
+                    </Link>
+                  )}
+                </div>
+              </div>
+            </div>
+            <div className="hidden md:block">
+              {currentUser ? (
+                <div className="ml-4 flex items-center md:ml-6">
+                  <Link to={"/profile"} className="text-gray-600 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium">
+                    {currentUser.email}
+                  </Link>
+                  <a href="/login" className="text-gray-600 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium" onClick={logOut}>
+                    Đăng xuất
+                  </a>
+                </div>
+              ) : (
+                <div className="ml-4 flex items-center md:ml-6">
+                  <Link to={"/login"} className="text-gray-600 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium">
+                    Đăng nhập
+                  </Link>
+                  <Link to={"/register"} className="bg-blue-600 text-white hover:bg-blue-700 px-3 py-2 rounded-md text-sm font-medium">
+                    Đăng ký
+                  </Link>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </nav>
+
+      <div className="container mx-auto mt-8 p-4">
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/home" element={<Home />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/user" element={<BoardUser />} />
+          <Route path="/admin" element={<BoardAdmin />} />
+        </Routes>
+      </div>
     </div>
   );
-}
+};
 
 export default App;
