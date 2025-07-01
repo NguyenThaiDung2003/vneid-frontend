@@ -1,17 +1,18 @@
 // src/services/admin.service.js
-import axios from 'axios';
-import authHeader from './auth-header';
+import apiClient from './api.config';
 
-const API_URL = 'http://localhost:5000/api/admin/';
+const API_PREFIX = '/admin';
 
 // Get dashboard statistics
 const getDashboard = () => {
-    return axios.get(API_URL + 'dashboard', { headers: authHeader() });
+    return apiClient.get(`${API_PREFIX}/dashboard`);
 };
 
 // Get all users with filtering and pagination
-const getAllUsers = (page = 1, limit = 10, search = '', status = '', verification = '') => {
-    const params = new URLSearchParams({
+const getAllUsers = (params = {}) => {
+    const { page = 1, limit = 10, search = '', status = '', verification = '' } = params;
+    
+    const queryParams = new URLSearchParams({
         page: page.toString(),
         limit: limit.toString(),
         search,
@@ -19,32 +20,32 @@ const getAllUsers = (page = 1, limit = 10, search = '', status = '', verificatio
         verification
     });
     
-    return axios.get(API_URL + `users?${params}`, { headers: authHeader() });
+    return apiClient.get(`${API_PREFIX}/users?${queryParams}`);
 };
 
 // Get user details by ID
 const getUserDetails = (userId) => {
-    return axios.get(API_URL + `users/${userId}`, { headers: authHeader() });
+    return apiClient.get(`${API_PREFIX}/users/${userId}`);
 };
 
-// Update user verification status
-const updateVerificationStatus = (userId, status, note = '') => {
-    return axios.put(API_URL + `users/${userId}/verification`, {
+// Update user verification status (theo backend controller)
+const updateVerificationStatus = (userId, status, notes = '') => {
+    return apiClient.put(`${API_PREFIX}/users/${userId}/verification`, {
         status,
-        note
-    }, { headers: authHeader() });
+        notes // backend expects 'notes' not 'note'
+    });
 };
 
 // Toggle user active status
 const toggleUserStatus = (userId) => {
-    return axios.put(API_URL + `users/${userId}/status`, {}, { headers: authHeader() });
+    return apiClient.put(`${API_PREFIX}/users/${userId}/status`);
 };
 
-// Update user role
-const updateUserRole = (userId, role) => {
-    return axios.put(API_URL + `users/${userId}/role`, {
-        role
-    }, { headers: authHeader() });
+// Update user role (theo backend controller)
+const updateUserRole = (userId, roleIds) => {
+    return apiClient.put(`${API_PREFIX}/users/${userId}/role`, {
+        roleIds // backend expects array of role IDs
+    });
 };
 
 const AdminService = {

@@ -1,49 +1,75 @@
-// --- Cập nhật service để có các hàm quản lý profile ---
-import axios from 'axios';
-import authHeader from './auth-header';
+// src/services/user.service.js
+import apiClient from './api.config';
 
-const API_URL = 'http://localhost:5000/api/user/';
+const API_PREFIX = '/user';
 
 // Lấy thông tin hồ sơ chi tiết
 const getProfile = () => {
-    return axios.get(API_URL + 'profile', { headers: authHeader() });
+    return apiClient.get(`${API_PREFIX}/profile`);
 };
 
 // Cập nhật thông tin hồ sơ
-const updateProfile = (data) => {
-    return axios.put(API_URL + 'profile', data, { headers: authHeader() });
+const updateProfile = (profileData) => {
+    const { firstName, lastName, phoneNumber, dateOfBirth,address,gender ,idNumber} = profileData;
+    return apiClient.put(`${API_PREFIX}/profile`, {
+        firstName,
+        lastName,
+        phoneNumber,
+        dateOfBirth,
+        address,
+        gender,
+        idNumber,
+    });
 };
 
 // Upload ảnh đại diện
 const uploadAvatar = (file) => {
-    let formData = new FormData();
+    const formData = new FormData();
     formData.append("avatar", file);
-    return axios.post(API_URL + 'upload/avatar', formData, {
+    return apiClient.post(`${API_PREFIX}/upload/avatar`, formData, {
         headers: {
-            ...authHeader(),
             "Content-Type": "multipart/form-data",
         }
     });
 };
 
-// Upload ảnh CCCD
+// Upload ảnh CCCD (theo cấu trúc backend)
 const uploadIdCard = (frontFile, backFile) => {
-    let formData = new FormData();
+    const formData = new FormData();
     formData.append("front", frontFile);
-    formData.append("back", backFile);
-    return axios.post(API_URL + 'upload/idcard', formData, {
+    if (backFile) {
+        formData.append("back", backFile);
+    }
+    return apiClient.post(`${API_PREFIX}/upload/idcard`, formData, {
         headers: {
-            ...authHeader(),
             "Content-Type": "multipart/form-data",
         }
     });
 };
 
-
+// Gửi yêu cầu xác minh
+const requestVerification = () => {
+    return apiClient.post(`${API_PREFIX}/verify`);
+};
+const getVerificationStatus = () => {
+    return apiClient.get(`${API_PREFIX}/verification/status`);
+};
+const fetchUserProfile = () => {
+  return apiClient.get('/user/full-profile');
+};
+const updateUserHealth = (healthData) => {
+    const   {height, weight, bloodType,chronicDiseases, allergies}=healthData
+  return apiClient.put(`${API_PREFIX}/health`,  {height, weight,bloodType,chronicDiseases, allergies});
+};
 const UserService = {
     getProfile,
     updateProfile,
     uploadAvatar,
     uploadIdCard,
+    requestVerification,
+    getVerificationStatus,
+    fetchUserProfile,
+    updateUserHealth
 };
+
 export default UserService;

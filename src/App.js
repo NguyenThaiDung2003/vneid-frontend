@@ -6,8 +6,8 @@ import Login from "./components/Login";
 import Register from "./components/Register";
 import Home from "./components/Home";
 import Profile from "./components/Profile";
-import BoardUser from "./components/BoardUser";
 import BoardAdmin from "./components/BoardAdmin";
+import AuthorizePage from "./components/Authorize";
 
 const App = () => {
   const [showAdminBoard, setShowAdminBoard] = useState(false);
@@ -15,11 +15,14 @@ const App = () => {
 
   useEffect(() => {
     const user = AuthService.getCurrentUser();
-
     if (user) {
       setCurrentUser(user);
-      setShowAdminBoard(user.role === 'admin');
+
+      // Check if the 'roles' array exists and includes the 'admin' string
+      // user.roles will be an array like ['admin', 'user'] or ['user']
+      setShowAdminBoard(user.roles && user.roles.includes('admin'));
     }
+
   }, []);
 
   const logOut = () => {
@@ -48,8 +51,8 @@ const App = () => {
                     </Link>
                   )}
                   {currentUser && (
-                    <Link to={"/user"} className="text-gray-600 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium">
-                      User Board
+                    <Link to={"/profile"} className="text-gray-600 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium">
+                      Profile
                     </Link>
                   )}
                 </div>
@@ -87,8 +90,8 @@ const App = () => {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/profile" element={<Profile />} />
-          <Route path="/user" element={<BoardUser />} />
           <Route path="/admin" element={<BoardAdmin />} />
+          <Route path="/authorize" element={<AuthorizePage/>}/>
         </Routes>
       </div>
     </div>

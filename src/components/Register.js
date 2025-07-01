@@ -11,7 +11,7 @@ const Register = () => {
     setMessage("");
     setSuccessful(false);
 
-    AuthService.register(data.email, data.password).then(
+    AuthService.register(data).then(
       (response) => {
         setMessage(response.data.message);
         setSuccessful(true);
@@ -43,6 +43,7 @@ const Register = () => {
                 </label>
                 <input
                   type="email"
+                  name="email"
                   className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                   {...register("email", { required: "Email là bắt buộc" })}
                 />
@@ -55,6 +56,7 @@ const Register = () => {
                 </label>
                 <input
                   type="password"
+                  name="password"
                   className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline"
                   {...register("password", { 
                     required: "Mật khẩu là bắt buộc",

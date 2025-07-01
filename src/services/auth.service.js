@@ -1,74 +1,77 @@
 // src/services/auth.service.js
-import axios from "axios";
+import apiClient from './api.config';
 
-const API_URL = "http://localhost:5000/api/auth/";
+const API_PREFIX = '/auth';
 
-const register = (email, password) => {
-  return axios.post(API_URL + "register", {
-    email,
-    password,
-  });
-};
-
-const login = (email, password, mfaToken = null) => {
-  return axios
-    .post(API_URL + "login", {
-      email,
-      password,
-      mfaToken,
-    })
-    .then((response) => {
-      if (response.data.accessToken) {
-        localStorage.setItem("user", JSON.stringify(response.data));
-      }
-      return response.data;
+const register = (userData) => {
+    const { email, password, firstName, lastName } = userData;
+    return apiClient.post(`${API_PREFIX}/register`, {
+        email,
+        password,
+        firstName,
+        lastName,
     });
 };
 
+const login = (email, password, mfaToken = null) => {
+    return apiClient
+        .post(`${API_PREFIX}/login`, {
+            email,
+            password,
+            mfaToken,
+        })
+        .then((response) => {
+            if (response.data.accessToken) {
+                localStorage.setItem("user", JSON.stringify(response.data));
+            }
+            return response.data;
+        });
+};
+
 const logout = () => {
-  localStorage.removeItem("user");
+    return apiClient.post(`${API_PREFIX}/logout`)
+        .then(() => {
+            localStorage.removeItem("user");
+        })
+        .catch(() => {
+            // Always remove user from localStorage even if logout fails
+            localStorage.removeItem("user");
+        });
+};
+
+const refreshToken = () => {
+    return apiClient.post(`${API_PREFIX}/refresh`);
 };
 
 const getCurrentUser = () => {
-  return JSON.parse(localStorage.getItem("user"));
+    return JSON.parse(localStorage.getItem("user"));
 };
 
 // === MFA Functions ===
 const setupMFA = () => {
-  const user = getCurrentUser();
-  return axios.post(API_URL + "mfa/setup", {}, {
-    headers: {
-      "x-access-token": user.accessToken,
-    },
-  });
+    return apiClient.post(`${API_PREFIX}/mfa/setup`);
 };
 
-const verifyMFA = (token) => {
-  const user = getCurrentUser();
-  return axios.post(API_URL + "mfa/verify", { token }, {
-    headers: {
-      "x-access-token": user.accessToken,
-    },
-  });
+const verifyMFA = (otp) => {
+    return apiClient.post(`${API_PREFIX}/mfa/verify`, { otp });
 };
 
-const disableMFA = (password, token) => {
-  const user = getCurrentUser();
-  return axios.post(API_URL + "mfa/disable", { password, token }, {
-    headers: {
-      "x-access-token": user.accessToken,
-    },
-  });
+const disableMFA = (password, otp) => {
+    return apiClient.post(`${API_PREFIX}/mfa/disable`, { password, otp });
 };
-
+const sendDisable=()=>{
+    return apiClient.post(`${API_PREFIX}/mfa/senddisableotp`);
+}
 const AuthService = {
-  register,
-  login,
-  logout,
-  getCurrentUser,
-  setupMFA,
-  verifyMFA,
-  disableMFA,
+    register,
+    login,
+    logout,
+    refreshToken,
+    getCurrentUser,
+    setupMFA,
+    verifyMFA,
+    disableMFA,
+    sendDisable,
 };
 
 export default AuthService;
